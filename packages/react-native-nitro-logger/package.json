@@ -1,0 +1,111 @@
+{
+  "name": "react-native-nitro-logger",
+  "version": "0.0.1",
+  "description": "Composable structured logging for React Native with Nitro-powered OSLog and Logcat",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "files": [
+    "src",
+    "react-native.config.js",
+    "lib",
+    "nitrogen",
+    "android/build.gradle",
+    "android/gradle.properties",
+    "android/fix-prefab.gradle",
+    "android/CMakeLists.txt",
+    "android/src",
+    "cpp",
+    "ios/**/*.h",
+    "ios/**/*.m",
+    "ios/**/*.mm",
+    "ios/**/*.cpp",
+    "ios/**/*.swift",
+    "app.plugin.js",
+    "nitro.json",
+    "*.podspec",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "specs": "nitrogen",
+    "prepack": "bun run specs && bun run build"
+  },
+  "keywords": [
+    "react-native",
+    "nitro-modules",
+    "logger",
+    "logging",
+    "oslog",
+    "logcat",
+    "sentry",
+    "datadog"
+  ],
+  "author": "IAUTI Labs",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "react-native-nitro-modules": "0.37.1"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.83.0",
+    "react-native-nitro-modules": ">=0.37.1 <0.38.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native-nitro-modules": {
+      "optional": true
+    }
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "react-native": "./src/index.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    },
+    "./system": {
+      "types": "./lib/system.d.ts",
+      "react-native": "./src/system.ts",
+      "import": "./lib/system.js",
+      "default": "./lib/system.js"
+    },
+    "./console": {
+      "types": "./lib/console.d.ts",
+      "react-native": "./src/console.ts",
+      "import": "./lib/console.js",
+      "default": "./lib/console.js"
+    },
+    "./memory": {
+      "types": "./lib/memory.d.ts",
+      "react-native": "./src/memory.ts",
+      "import": "./lib/memory.js",
+      "default": "./lib/memory.js"
+    },
+    "./sentry": {
+      "types": "./lib/sentry.d.ts",
+      "react-native": "./src/sentry.ts",
+      "import": "./lib/sentry.js",
+      "default": "./lib/sentry.js"
+    },
+    "./datadog": {
+      "types": "./lib/datadog.d.ts",
+      "react-native": "./src/datadog.ts",
+      "import": "./lib/datadog.js",
+      "default": "./lib/datadog.js"
+    }
+  },
+  "homepage": "https://github.com/iauti/react-native-nitro-logger",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iauti/react-native-nitro-logger.git"
+  }
+}

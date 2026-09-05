@@ -1,0 +1,69 @@
+name: Check
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  portable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: bun run check:generated
+      - run: bun run check
+      - run: bun run package:check
+      - run: bunx expo export --platform web
+        working-directory: apps/example
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - run: bun install --frozen-lockfile
+      - run: |
+          curl -fL https://repo1.maven.org/maven2/com/pinterest/ktlint/ktlint-cli/1.7.1/ktlint-cli-1.7.1-all.jar -o /tmp/ktlint.jar
+          java -jar /tmp/ktlint.jar 'packages/react-native-nitro-logger/android/src/main/java/**/*.kt'
+      - run: bunx expo prebuild --platform android --no-install
+        working-directory: apps/example
+      - run: ./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a --console=plain
+        working-directory: apps/example/android
+  ios:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: xcrun swift-format lint --strict -r packages/react-native-nitro-logger/ios
+      - run: bunx expo prebuild --platform ios --no-install
+        working-directory: apps/example
+      - run: pod install
+        working-directory: apps/example/ios
+      - run: python3 scripts/select-ios-simulator.py >> "$GITHUB_ENV"
+      - run: xcodebuild -workspace apps/example/ios/NitroLoggerLab.xcworkspace -scheme NitroLoggerLab -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,id=$HARNESS_IOS_UDID" -derivedDataPath build/ios ONLY_ACTIVE_ARCH=YES ARCHS=arm64 CODE_SIGNING_ALLOWED=NO
+      - run: |
+          xcrun simctl bootstatus "$HARNESS_IOS_UDID" -b
+          xcrun simctl install "$HARNESS_IOS_UDID" build/ios/Build/Products/Debug-iphonesimulator/NitroLoggerLab.app
+          bun run example harness --harnessRunner ios

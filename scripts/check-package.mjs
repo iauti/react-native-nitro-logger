@@ -1,0 +1,15 @@
+import { execFileSync } from 'node:child_process';
+import assert from 'node:assert/strict';
+const cwd = new URL('../packages/react-native-nitro-logger/', import.meta.url);
+const [packed] = JSON.parse(execFileSync('npm', ['pack', '--dry-run', '--ignore-scripts', '--json'], { cwd, encoding: 'utf8' }));
+const paths = new Set(packed.files.map(file => file.path));
+for (const file of ['lib/index.js', 'lib/index.d.ts', 'lib/system.js', 'lib/memory.js', 'lib/sentry.js', 'lib/datadog.js', 'NitroLogger.podspec', 'nitro.json', 'ios/HybridSystemLogSink.swift', 'nitrogen/generated/ios/NitroLogger+autolinking.rb', 'nitrogen/generated/android/NitroLogger+autolinking.gradle', 'android/src/main/java/com/margelo/nitro/nitrologger/HybridSystemLogSink.kt', 'LICENSE']) assert(paths.has(file), `Missing package file: ${file}`);
+assert(![...paths].some(path => /node_modules|\.cxx\/|android\/build\/|\.expo/.test(path)), 'Build artifacts must not ship');
+const { createLogger } = await import('../packages/react-native-nitro-logger/lib/index.js');
+const { createMemoryTransport } = await import('../packages/react-native-nitro-logger/lib/memory.js');
+const memory = createMemoryTransport();
+const logger = createLogger({ transports: [{ transport: memory }] });
+logger.info('Node import works without loading Nitro');
+await logger.close();
+assert.equal(memory.getRecords().length, 1);
+console.log(`Package verified: ${paths.size} files, ${(packed.unpackedSize / 1024).toFixed(1)} KiB unpacked; portable ESM imports work.`);

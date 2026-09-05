@@ -1,0 +1,12 @@
+node_modules/
+lib/
+.expo/
+dist/
+.DS_Store
+apps/example/ios/
+apps/example/android/
+**/build/
+**/.gradle/
+*.tgz
+.harness/
+.cxx/
