@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Nitro Logger Lab",
+    "slug": "nitro-logger-lab",
+    "scheme": "nitrologgerlab",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": { "bundleIdentifier": "com.iauti.nitrologger.example" },
+    "android": { "package": "com.iauti.nitrologger.example" },
+    "plugins": ["expo-router"],
+    "web": { "bundler": "metro", "output": "single" }
+  }
+}

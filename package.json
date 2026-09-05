@@ -1,0 +1,27 @@
+{
+  "name": "nitro-logger-workspace",
+  "private": true,
+  "packageManager": "bun@1.3.14",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "specs": "bun run --cwd packages/react-native-nitro-logger specs",
+    "build": "tsc -p packages/react-native-nitro-logger/tsconfig.json",
+    "typecheck": "tsc -p packages/react-native-nitro-logger/tsconfig.json --noEmit && tsc -p apps/example/tsconfig.json --noEmit && tsc -p tests/tsconfig.json",
+    "test": "bun test tests",
+    "format": "prettier --write packages/react-native-nitro-logger/src tests apps/example/src docs README.md",
+    "format:check": "prettier --check packages/react-native-nitro-logger/src tests apps/example/src docs README.md",
+    "check": "bun run specs && bun run build && bun run typecheck && bun test && bun run format:check",
+    "example": "bun run --cwd apps/example",
+    "package:check": "bun run build && node scripts/check-package.mjs",
+    "check:generated": "node scripts/check-generated.mjs"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "prettier": "3.8.3",
+    "@types/bun": "1.4.1",
+    "nitrogen": "0.37.1"
+  }
+}
