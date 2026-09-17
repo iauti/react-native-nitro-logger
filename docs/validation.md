@@ -42,6 +42,6 @@ The GitHub Check workflow passed for main commit e5863b5 (portable, Android, and
 
 ## Release flow rehearsal (September 17, 2026)
 
-`bun release 0.1.0 --dry-run` completed both package npm dry-run and root Git/GitHub preview. npm authentication was deliberately skipped for the dry run; live publication remains blocked by the local npm session returning 401.
+`bun release 0.1.0 --ci --dry-run --npm.skipChecks` completed both package npm dry-run and root Git/GitHub preview. npm authentication was deliberately skipped for the dry run; live publication remains blocked by the local npm session returning 401.
 
 `bun run release:test` passed real version bumps, prepack, required artifact contents, clean-consumer installation/import/redaction, workspace lockfile synchronization, Git commit/tag/local push, recovery from a rejected push, and duplicate-version refusal. It uses a disposable repository and local bare remote; no npm package or GitHub release was published. CI now runs this rehearsal.

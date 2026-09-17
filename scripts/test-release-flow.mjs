@@ -55,7 +55,7 @@ try {
   run("git", ["config", "user.name", "Release flow test"]);
   run("git", ["config", "user.email", "release-test@example.invalid"]);
   run("git", ["add", "."]);
-  run("git", ["commit", "-m", "Release fixture"]);
+  run("git", ["commit", "-m", "feat: release fixture"]);
   run("git", ["remote", "add", "origin", remote]);
   run("git", ["push", "-u", "origin", "main"]);
 
@@ -143,6 +143,10 @@ try {
     "--no-github.release",
   ]);
   assert.equal(json(path.join(repo, "package.json")).version, version);
+  assert.equal(
+    json(path.join(repo, "apps/example/package.json")).version,
+    version,
+  );
   const lock = JSON.parse(
     run("bun", [
       "-e",

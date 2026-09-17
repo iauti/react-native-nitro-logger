@@ -111,16 +111,16 @@
     "url": "git+https://github.com/iauti/react-native-nitro-logger.git"
   },
   "release-it": {
+    "npm": {
+      "publish": true
+    },
     "git": false,
     "github": {
       "release": false
     },
-    "npm": {
-      "publish": true,
-      "publishArgs": [
-        "--access",
-        "public"
-      ]
+    "hooks": {
+      "before:init": "bun typecheck",
+      "after:bump": "bun run build"
     }
   }
 }

@@ -17,15 +17,51 @@
     "example": "bun run --cwd apps/example",
     "package:check": "bun run build && node scripts/check-package.mjs",
     "check:generated": "node scripts/check-generated.mjs",
-    "release": "bash scripts/release.sh",
+    "release": "./scripts/release.sh",
     "release:test": "node scripts/test-release-flow.mjs"
   },
   "devDependencies": {
+    "@release-it/bumper": "8.0.1",
+    "@release-it/conventional-changelog": "12.0.2",
     "@types/bun": "1.4.1",
     "nitrogen": "0.37.1",
     "prettier": "3.8.3",
     "release-it": "21.0.3",
     "typescript": "6.0.3"
   },
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "release-it": {
+    "npm": {
+      "publish": false
+    },
+    "git": {
+      "commitMessage": "chore: release ${version}",
+      "tagName": "v${version}",
+      "requireCleanWorkingDir": false
+    },
+    "github": {
+      "release": true
+    },
+    "hooks": {
+      "before:release": "bun run build && bun run specs",
+      "after:bump": "bun install --lockfile-only --ignore-scripts && node scripts/sync-workspace-versions.mjs"
+    },
+    "plugins": {
+      "@release-it/bumper": {
+        "out": [
+          {
+            "file": "packages/react-native-nitro-logger/package.json",
+            "path": "version"
+          },
+          {
+            "file": "apps/example/package.json",
+            "path": "version"
+          }
+        ]
+      },
+      "@release-it/conventional-changelog": {
+        "preset": "conventionalcommits"
+      }
+    }
+  }
 }

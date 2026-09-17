@@ -38,6 +38,8 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - run: bun install --frozen-lockfile
       - run: |
           curl -fL https://repo1.maven.org/maven2/com/pinterest/ktlint/ktlint-cli/1.7.1/ktlint-cli-1.7.1-all.jar -o /tmp/ktlint.jar
