@@ -38,4 +38,10 @@ For another installed iOS simulator, set `HARNESS_IOS_DEVICE` and `HARNESS_IOS_V
 - Local Watchman cannot load its installed `libfmt` version. Harness uses Node filesystem watching through its supported setting, and Jest has `watchman: false`. The global Watchman installation was not modified.
 - An initial dual-architecture iOS build exhausted disk space. Task-created build intermediates were removed and arm64 was built successfully. Intel simulator builds remain unverified.
 
-The GitHub workflow is provided but has not been executed remotely. The package is not published, and repository metadata names the intended release location.
+The GitHub Check workflow passed for main commit e5863b5 (portable, Android, and iOS jobs). On September 17, 2026, local library/example/test TypeScript checks, 17 portable tests, codegen, and formatting passed again. This implementation is not yet published; the original unscoped npm name belongs to another author. See [release preparation](releases.md).
+
+## Release flow rehearsal (September 17, 2026)
+
+`bun release 0.1.0 --dry-run` completed both package npm dry-run and root Git/GitHub preview. npm authentication was deliberately skipped for the dry run; live publication remains blocked by the local npm session returning 401.
+
+`bun run release:test` passed real version bumps, prepack, required artifact contents, clean-consumer installation/import/redaction, workspace lockfile synchronization, Git commit/tag/local push, recovery from a rejected push, and duplicate-version refusal. It uses a disposable repository and local bare remote; no npm package or GitHub release was published. CI now runs this rehearsal.

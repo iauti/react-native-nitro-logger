@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Text } from "react-native";
-import { createLogger } from "react-native-nitro-logger";
-import { createMemoryTransport } from "react-native-nitro-logger/memory";
+import { createLogger } from "react-native-nitro-loggerkit";
+import { createMemoryTransport } from "react-native-nitro-loggerkit/memory";
 import { Action, Card, Heading, Page, styles } from "../components/ui";
 import { logger } from "../logging/logger";
 

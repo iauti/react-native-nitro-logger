@@ -1,0 +1,18 @@
+{
+  "npm": {
+    "publish": false
+  },
+  "git": {
+    "requireCleanWorkingDir": false,
+    "requireBranch": "main",
+    "commitMessage": "chore: release ${version}",
+    "tagName": "v${version}"
+  },
+  "github": {
+    "release": true,
+    "releaseNotes": "cat CHANGELOG.md"
+  },
+  "hooks": {
+    "after:bump": "bun install --lockfile-only --ignore-scripts && node scripts/sync-workspace-versions.mjs"
+  }
+}

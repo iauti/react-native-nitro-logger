@@ -16,12 +16,16 @@
     "check": "bun run specs && bun run build && bun run typecheck && bun test && bun run format:check",
     "example": "bun run --cwd apps/example",
     "package:check": "bun run build && node scripts/check-package.mjs",
-    "check:generated": "node scripts/check-generated.mjs"
+    "check:generated": "node scripts/check-generated.mjs",
+    "release": "bash scripts/release.sh",
+    "release:test": "node scripts/test-release-flow.mjs"
   },
   "devDependencies": {
-    "typescript": "6.0.3",
-    "prettier": "3.8.3",
     "@types/bun": "1.4.1",
-    "nitrogen": "0.37.1"
-  }
+    "nitrogen": "0.37.1",
+    "prettier": "3.8.3",
+    "release-it": "21.0.3",
+    "typescript": "6.0.3"
+  },
+  "version": "0.0.1"
 }
