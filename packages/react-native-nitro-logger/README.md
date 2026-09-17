@@ -5,8 +5,8 @@ Composable structured logging for React Native, with Nitro-powered OSLog and Log
 One logger, child context, and independent transport plugins. The core has no Node polyfills or vendor SDK dependencies. This is a new, unpublished library; the repository URL in package metadata is the intended release location.
 
 ```ts
-import { createLogger } from "react-native-nitro-logger";
-import { createSystemTransport } from "react-native-nitro-logger/system";
+import { createLogger } from "react-native-nitro-loggerkit";
+import { createSystemTransport } from "react-native-nitro-loggerkit/system";
 
 const logger = createLogger({
   level: "info",
@@ -33,7 +33,7 @@ bun run example harness --harnessRunner ios # after installing the native app
 
 The [Expo Router playground](../../apps/example) includes child context, redaction, errors, a 1,000-record burst, counters, and a failure-isolation demo. It follows FileToolkit's `packages/` + `apps/example` layout and uses Expo SDK 57, React Native 0.86.3, and Nitro 0.37.1. Native system logging requires a development build; Expo Go cannot load this module. Web supports the core and portable plugins. Do not import `/system` on web.
 
-After publication, install `react-native-nitro-logger` alongside `react-native-nitro-modules`, then rebuild the native app. Until then, use this workspace or a locally packed tarball. The declared React Native range starts at 0.83; validation targets 0.86.3, not every release in the range. Use Xcode 16.4+ and the Android toolchain selected by your React Native app; this example was built with Xcode 26.6.
+After publication, install `react-native-nitro-loggerkit` alongside `react-native-nitro-modules`, then rebuild the native app. Until then, use this workspace or a locally packed tarball. The declared React Native range starts at 0.83; validation targets 0.86.3, not every release in the range. Use Xcode 16.4+ and the Android toolchain selected by your React Native app; this example was built with Xcode 26.6.
 
 ## Choose transports
 
@@ -50,9 +50,9 @@ Factories return structural `Transport` objects. Plugin entry points isolate dep
 ```ts
 import * as Sentry from "@sentry/react-native";
 import { DdLogs } from "@datadog/mobile-react-native";
-import { createLogger } from "react-native-nitro-logger";
-import { createSentryTransport } from "react-native-nitro-logger/sentry";
-import { createDatadogTransport } from "react-native-nitro-logger/datadog";
+import { createLogger } from "react-native-nitro-loggerkit";
+import { createSentryTransport } from "react-native-nitro-loggerkit/sentry";
+import { createDatadogTransport } from "react-native-nitro-loggerkit/datadog";
 
 // Initialize both SDKs in your app first. Sentry requires enableLogs: true.
 const logger = createLogger({
@@ -68,7 +68,7 @@ Sentry receives six native log levels. Nested attribute values become JSON strin
 ## Write a plugin
 
 ```ts
-import type { Transport } from "react-native-nitro-logger";
+import type { Transport } from "react-native-nitro-loggerkit";
 
 const transport: Transport = {
   name: "custom",

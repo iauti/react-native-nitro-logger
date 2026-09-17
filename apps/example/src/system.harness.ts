@@ -1,7 +1,7 @@
 import { describe, expect, it } from "react-native-harness";
-import { createLogger, type LogLevel } from "react-native-nitro-logger";
-import { createMemoryTransport } from "react-native-nitro-logger/memory";
-import { createSystemTransport } from "react-native-nitro-logger/system";
+import { createLogger, type LogLevel } from "react-native-nitro-loggerkit";
+import { createMemoryTransport } from "react-native-nitro-loggerkit/memory";
+import { createSystemTransport } from "react-native-nitro-loggerkit/system";
 
 describe("Nitro system transport", () => {
   it("creates a native handle and writes all severities in ordered batches", async () => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Text, View } from "react-native";
-import type { LogRecord } from "react-native-nitro-logger";
+import type { LogRecord } from "react-native-nitro-loggerkit";
 import { Action, Card, Heading, Page, styles, colors } from "../components/ui";
 import { checkout, logger, memory, systemDescription } from "../logging/logger";
 

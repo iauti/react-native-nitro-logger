@@ -1,6 +1,6 @@
-import { createLogger } from "react-native-nitro-logger";
-import { createConsoleTransport } from "react-native-nitro-logger/console";
-import { createMemoryTransport } from "react-native-nitro-logger/memory";
+import { createLogger } from "react-native-nitro-loggerkit";
+import { createConsoleTransport } from "react-native-nitro-loggerkit/console";
+import { createMemoryTransport } from "react-native-nitro-loggerkit/memory";
 import { systemTarget } from "./systemTarget";
 
 export const memory = createMemoryTransport({ capacity: 100 });

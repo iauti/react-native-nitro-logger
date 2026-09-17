@@ -1,5 +1,5 @@
-import { createSystemTransport } from "react-native-nitro-logger/system";
-import type { Transport } from "react-native-nitro-logger";
+import { createSystemTransport } from "react-native-nitro-loggerkit/system";
+import type { Transport } from "react-native-nitro-loggerkit";
 
 export function systemTarget(): { transport?: Transport; description: string } {
   try {

@@ -1,5 +1,5 @@
 {
-  "name": "react-native-nitro-logger",
+  "name": "react-native-nitro-loggerkit",
   "version": "0.0.1",
   "description": "Composable structured logging for React Native with Nitro-powered OSLog and Logcat",
   "main": "./lib/index.js",
@@ -34,7 +34,8 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "specs": "nitrogen",
-    "prepack": "bun run specs && bun run build"
+    "prepack": "bun run specs && bun run build",
+    "release": "release-it"
   },
   "keywords": [
     "react-native",
@@ -49,7 +50,8 @@
   "author": "IAUTI Labs",
   "license": "MIT",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "react-native-nitro-modules": "0.37.1"
@@ -107,5 +109,18 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/iauti/react-native-nitro-logger.git"
+  },
+  "release-it": {
+    "npm": {
+      "publish": true
+    },
+    "git": false,
+    "github": {
+      "release": false
+    },
+    "hooks": {
+      "before:init": "bun typecheck",
+      "after:bump": "bun run build"
+    }
   }
 }

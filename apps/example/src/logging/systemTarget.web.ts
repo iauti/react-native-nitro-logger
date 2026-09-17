@@ -1,4 +1,4 @@
-import type { Transport } from "react-native-nitro-logger";
+import type { Transport } from "react-native-nitro-loggerkit";
 
 export function systemTarget(): { transport?: Transport; description: string } {
   return {
