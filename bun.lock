@@ -16,7 +16,7 @@
     },
     "apps/example": {
       "name": "nitro-logger-example",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "expo": "~57.0.20",
         "expo-constants": "~57.0.17",
@@ -49,7 +49,7 @@
     },
     "packages/react-native-nitro-logger": {
       "name": "react-native-nitro-loggerkit",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "devDependencies": {
         "react-native-nitro-filetoolkit": "0.1.0",
         "react-native-nitro-modules": "0.37.1",
