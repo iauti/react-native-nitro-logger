@@ -51,13 +51,16 @@
       "name": "react-native-nitro-loggerkit",
       "version": "0.1.0",
       "devDependencies": {
+        "react-native-nitro-filetoolkit": "0.1.0",
         "react-native-nitro-modules": "0.37.1",
       },
       "peerDependencies": {
         "react-native": ">=0.83.0",
+        "react-native-nitro-filetoolkit": "^0.1.0",
         "react-native-nitro-modules": ">=0.37.1 <0.38.0",
       },
       "optionalPeers": [
+        "react-native-nitro-filetoolkit",
         "react-native-nitro-modules",
       ],
     },
@@ -1688,6 +1691,8 @@
     "react-native-harness": ["react-native-harness@1.4.1", "", { "dependencies": { "@react-native-harness/babel-preset": "1.4.1", "@react-native-harness/cli": "1.4.1", "@react-native-harness/jest": "1.4.1", "@react-native-harness/metro": "1.4.1", "@react-native-harness/runtime": "1.4.1", "tslib": "^2.3.0" }, "bin": { "react-native-harness": "bin.js", "harness": "bin.js" } }, "sha512-eqIwIIrDvA2vCvRVt/sl5sCfaULXfReLFIe7G94o4mLwwkxADngzaoApuc+hV9JyEaDaPPMPATwUDfmTwIasRA=="],
 
     "react-native-is-edge-to-edge": ["react-native-is-edge-to-edge@1.3.1", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-NIXU/iT5+ORyCc7p0z2nnlkouYKX425vuU1OEm6bMMtWWR9yvb+Xg5AZmImTKoF9abxCPqrKC3rOZsKzUYgYZA=="],
+
+    "react-native-nitro-filetoolkit": ["react-native-nitro-filetoolkit@0.1.0", "", { "peerDependencies": { "react": "*", "react-native": "*", "react-native-nitro-modules": ">=0.37.1 <0.38.0" } }, "sha512-TIEYbkp6VesKKn/XEmR3VOpJ1klH7ENzaoV4apr7DwyVCWml4el+aKOOSSeJjAGKbVu4cdBPQX3/2KgA7NaR5g=="],
 
     "react-native-nitro-loggerkit": ["react-native-nitro-loggerkit@workspace:packages/react-native-nitro-logger"],
 

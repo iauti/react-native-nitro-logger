@@ -47,6 +47,6 @@ After npm succeeds, never republish the same version. Verify `npm view react-nat
 
 Root release-it never publishes npm. If a GitHub release already exists, inspect it before retrying.
 
-## First release status
+## Published package
 
-The chosen npm name is `react-native-nitro-loggerkit`; the original `react-native-nitro-logger` belongs to another author. Publication is pending npm authentication (last check: 401 on September 17, 2026). Proposed first version: 0.1.0.
+The npm name is `react-native-nitro-loggerkit`; the original `react-native-nitro-logger` belongs to another author. Version 0.1.0 is published. Use the intended next version in the commands above.

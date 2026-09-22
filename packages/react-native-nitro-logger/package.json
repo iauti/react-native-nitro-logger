@@ -54,14 +54,19 @@
     "access": "public"
   },
   "devDependencies": {
-    "react-native-nitro-modules": "0.37.1"
+    "react-native-nitro-modules": "0.37.1",
+    "react-native-nitro-filetoolkit": "0.1.0"
   },
   "peerDependencies": {
     "react-native": ">=0.83.0",
-    "react-native-nitro-modules": ">=0.37.1 <0.38.0"
+    "react-native-nitro-modules": ">=0.37.1 <0.38.0",
+    "react-native-nitro-filetoolkit": "^0.1.0"
   },
   "peerDependenciesMeta": {
     "react-native-nitro-modules": {
+      "optional": true
+    },
+    "react-native-nitro-filetoolkit": {
       "optional": true
     }
   },
@@ -103,6 +108,18 @@
       "react-native": "./src/datadog.ts",
       "import": "./lib/datadog.js",
       "default": "./lib/datadog.js"
+    },
+    "./file": {
+      "types": "./lib/file.d.ts",
+      "react-native": "./src/file.ts",
+      "import": "./lib/file.js",
+      "default": "./lib/file.js"
+    },
+    "./filetoolkit": {
+      "types": "./lib/filetoolkit.d.ts",
+      "react-native": "./src/filetoolkit.ts",
+      "import": "./lib/filetoolkit.js",
+      "default": "./lib/filetoolkit.js"
     }
   },
   "homepage": "https://github.com/iauti/react-native-nitro-logger",
