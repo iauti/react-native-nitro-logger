@@ -2,7 +2,7 @@
 
 Composable structured logging for React Native, with Nitro-powered OSLog and Logcat.
 
-One logger, child context, and independent transport plugins. The core has no Node polyfills or vendor SDK dependencies. This is a new, unpublished library; the repository URL in package metadata is the intended release location.
+One logger, child context, and independent transport plugins. The core has no Node polyfills or vendor SDK dependencies.
 
 ```ts
 import { createLogger } from "react-native-nitro-loggerkit";
@@ -33,7 +33,7 @@ bun run example harness --harnessRunner ios # after installing the native app
 
 The [Expo Router playground](apps/example) includes child context, redaction, errors, a 1,000-record burst, counters, and a failure-isolation demo. It follows FileToolkit's `packages/` + `apps/example` layout and uses Expo SDK 57, React Native 0.86.3, and Nitro 0.37.1. Native system logging requires a development build; Expo Go cannot load this module. Web supports the core and portable plugins. Do not import `/system` on web.
 
-After publication, install `react-native-nitro-loggerkit` alongside `react-native-nitro-modules`, then rebuild the native app. Until then, use this workspace or a locally packed tarball. The declared React Native range starts at 0.83; validation targets 0.86.3, not every release in the range. Use Xcode 16.4+ and the Android toolchain selected by your React Native app; this example was built with Xcode 26.6.
+Install `react-native-nitro-loggerkit` alongside `react-native-nitro-modules`, then rebuild the native app. The declared React Native range starts at 0.83; validation targets 0.86.3, not every release in the range. Use Xcode 16.4+ and the Android toolchain selected by your React Native app; this example was built with Xcode 26.6.
 
 ## Choose transports
 
@@ -64,6 +64,37 @@ const logger = createLogger({
 ```
 
 Sentry receives six native log levels. Nested attribute values become JSON strings because Sentry log attributes are scalar. Datadog maps `trace` to `debug` and `fatal` to `error`, preserving the original level in `nitro.level`. Both include `nitro.sequence` and `nitro.timestamp_ms`. Vendor SDK context may contribute additional attributes outside this logger's redaction boundary. Adapters do not initialize, close, or reconfigure global SDKs and do not capture synthetic exceptions. See [Sentry Logs](https://docs.sentry.io/platforms/react-native/logs/) and [Datadog React Native](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/react_native/advanced_configuration/) for SDK setup.
+
+## Rotating .log files
+
+Install `react-native-nitro-filetoolkit` alongside LoggerKit and rebuild the native app. FileToolkit is an optional peer dependency; only importing `/filetoolkit` loads it.
+
+```ts
+import { createLogger } from "react-native-nitro-loggerkit";
+import { createFileToolkitTransport } from "react-native-nitro-loggerkit/filetoolkit";
+
+const logger = createLogger({
+  transports: [
+    {
+      transport: createFileToolkitTransport({
+        directory: cacheDirectory + "/diagnostic-logs",
+        filename: "uploads.log",
+        maxFileBytes: 1024 * 1024,
+        maxFiles: 3,
+      }),
+      level: "info",
+    },
+  ],
+});
+```
+
+Supply an absolute app-owned directory path or `file://` URI. The transport creates it as needed and appends readable, single-line records: ISO timestamp, severity, optional category, message, and JSON metadata. Control characters and Unicode are escaped, keeping physical lines intact and byte accounting exact. Open the files in a text viewer, or use `tail -F uploads.log` and `grep` on a Mac after copying or exposing the sandbox directory.
+
+Rotation keeps `uploads.log`, `uploads.1.log`, and `uploads.2.log` in this example. `maxFiles` includes the active file; defaults are `current.log`, 1 MiB, and two files. Records are never split. Oversized records and unreadable or oversized existing active files fail the batch and appear in logger status. Other transports continue. Do not point multiple transports or processes at overlapping active/rotation filenames. Cache directories may be evicted by the OS.
+
+Like Winston, file formatting is independent of storage: optionally supply `format: record => JSON.stringify(record)`. The transport adds the newline and escapes actual control characters. Thresholds, queue bounds, and failure isolation use the normal logger transport configuration. `flush()` waits for writes; it does not promise an OS-level fsync or crash durability. Apply app-specific privacy filtering before file delivery; generic key redaction does not remove sensitive text from messages.
+
+For another filesystem backend, import `createFileTransport` and `FileSystemAdapter` from `/file`, supplying the same options plus `fileSystem`. This entry point is portable and does not load Nitro or FileToolkit. Custom transports remain ordinary injectable `Transport` objects.
 
 ## Write a plugin
 
