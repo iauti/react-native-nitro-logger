@@ -1,0 +1,20 @@
+# Alternatives and tradeoffs
+
+[Documentation index](README.md)
+
+Reviewed against upstream documentation on September 22, 2026. These are capability comparisons, not device benchmarks or maintenance rankings. Verify the chosen library's current compatibility with your app.
+
+| Option                                                                                | Consider it when                                                                                       | Difference to evaluate                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LoggerKit (this repository)                                                           | You want one structured record pipeline for native system logs, files, and app-owned SDKs              | Explicit bounded queues, immutable snapshots, child context, and failure isolation; JS normalization still costs CPU; no crash durability guarantee                                     |
+| [react-native-logs](https://github.com/mowispace/react-native-logs)                   | You want customizable levels/namespaces and console, file, or SDK transports for React Native/Expo/web | Its scheduling and transport API differ; compare overflow, ordering, flush, and privacy behavior for your workload before migrating                                                     |
+| [react-native-file-logger](https://github.com/BeTomorrow/react-native-file-logger)    | Your main need is rolling native files and support-log export                                          | Uses CocoaLumberjack/Logback and offers console capture and email export; LoggerKit uses explicit calls and an injected filesystem or optional FileToolkit backend                      |
+| [react-native-nitro-logger](https://github.com/AmirShayegh/react-native-nitro-logger) | You want its native file/system destinations and privacy-tier workflow                                 | Separate project and npm package with a different API; upstream documents rotation, compression, retention, and crash-tail recovery. LoggerKit does not promise those recovery features |
+| [Winston](https://github.com/winstonjs/winston)                                       | You need a Node.js logging ecosystem                                                                   | Its transports and formats inspired this design; it is not a drop-in native OSLog/Logcat integration                                                                                    |
+| Direct console / your existing telemetry SDK                                          | You only need one destination and its existing API                                                     | Avoid adding an abstraction unless shared context, privacy normalization, queue accounting, or multi-destination delivery is useful                                                     |
+
+## How to choose
+
+Start with your required destinations and delivery guarantees. If you only need development output, console may suffice. If native rolling files and export are the entire requirement, evaluate a dedicated file logger. If several destinations need the same immutable, redacted records and independent failure handling, LoggerKit's composition is useful.
+
+For migration, map severity names, context precedence, SDK initialization, and shutdown behavior explicitly. Do not assume a successful `flush()` means the same thing across libraries. Compare identical payloads, destinations, build modes, and accepted/dropped counts on real devices before choosing on speed. [Our performance review](performance.md) describes current costs and measurement gaps.

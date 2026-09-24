@@ -1,150 +1,122 @@
-# Nitro Logger
+# Nitro LoggerKit
 
-Composable structured logging for React Native, with Nitro-powered OSLog and Logcat.
+Structured logging for React Native: child context, redaction, bounded queues, and independent destinations. Send the same records to OSLog/Logcat through Nitro, console, memory, rotating files, Sentry, or Datadog.
 
-One logger, child context, and independent transport plugins. The core has no Node polyfills or vendor SDK dependencies.
+The npm package is **`react-native-nitro-loggerkit`**. `react-native-nitro-logger` is a different project. The portable core does not load Nitro or vendor SDKs.
+
+## Quick start
+
+In an existing React Native app:
+
+```sh
+npm install react-native-nitro-loggerkit
+```
+
+Create one logger in an app-owned module, such as `src/logger.ts`:
 
 ```ts
 import { createLogger } from "react-native-nitro-loggerkit";
-import { createSystemTransport } from "react-native-nitro-loggerkit/system";
+import { createConsoleTransport } from "react-native-nitro-loggerkit/console";
 
-const logger = createLogger({
+export const logger = createLogger({
   level: "info",
   context: { app: "shop" },
-  transports: [{ transport: createSystemTransport({ category: "App" }) }],
+  transports: [{ transport: createConsoleTransport() }],
 });
 
 const checkout = logger.child({ feature: "checkout" });
 checkout.info("Payment started", { amount: 42, currency: "EUR" });
 checkout.error("Payment failed", { error: new Error("Network timeout") });
-const status = await logger.flush();
 ```
 
-## Run locally
+You should see `Payment started` and `Payment failed` in the JavaScript console, with their attributes. Console delivery is deferred; `await logger.flush()` waits for earlier accepted records. No transport is enabled automatically. `debug()` and `trace()` are filtered at the default `info` level.
+
+For a deterministic check without console output:
+
+```ts
+import { createLogger } from "react-native-nitro-loggerkit";
+import { createMemoryTransport } from "react-native-nitro-loggerkit/memory";
+
+const memory = createMemoryTransport();
+const logger = createLogger({ transports: [{ transport: memory }] });
+logger.info("Ready", { token: "example-secret" });
+await logger.flush();
+console.log(memory.getRecords()[0]?.attributes.token); // "[REDACTED]"
+await logger.close(); // Only close when the entire logger family is finished.
+```
+
+## Add native OS logging
+
+Install the compatible Nitro peer and rebuild your native app:
 
 ```sh
-bun install
+npm install react-native-nitro-modules@~0.37.1
+```
+
+- **Expo:** use a development build (`npx expo run:ios` or `npx expo run:android`). Expo Go cannot load the native transport.
+- **Bare React Native:** install iOS pods (`cd ios && bundle exec pod install` when your app uses Bundler), then rebuild with your app's usual iOS/Android command.
+- **Web:** use portable transports and keep `/system` and `/filetoolkit` imports out of the web dependency graph. See [platform setup](docs/getting-started.md).
+
+```ts
+import { createLogger } from "react-native-nitro-loggerkit";
+import { createSystemTransport } from "react-native-nitro-loggerkit/system";
+
+export const logger = createLogger({
+  transports: [{ transport: createSystemTransport({ category: "App" }) }],
+});
+logger.info("App started");
+```
+
+Read output in macOS Console/Xcode for iOS, or `adb logcat -s App` for Android. iOS payloads are private by default and may appear as `<private>`; [system transport options](docs/transports.md#native-system-output) explain visibility.
+
+The declared React Native minimum is 0.83. The example targets React Native 0.86.3, Expo 57, and Nitro 0.37.1; this is not a claim that every version in the peer range has been tested. See [validation](docs/validation.md).
+
+## Choose a destination
+
+| Import suffix  | Factory                      | Use it for                                          |
+| -------------- | ---------------------------- | --------------------------------------------------- |
+| `/console`     | `createConsoleTransport`     | JS console during development                       |
+| `/memory`      | `createMemoryTransport`      | Recent records for tests or an in-app viewer        |
+| `/system`      | `createSystemTransport`      | Native OSLog and Logcat                             |
+| `/filetoolkit` | `createFileToolkitTransport` | Rotating app-owned files using optional FileToolkit |
+| `/file`        | `createFileTransport`        | Rotating files using your filesystem adapter        |
+| `/sentry`      | `createSentryTransport`      | Your initialized Sentry Logs SDK                    |
+| `/datadog`     | `createDatadogTransport`     | Your initialized Datadog Logs SDK                   |
+
+[Transport setup and examples](docs/transports.md) cover dependencies, options, file rotation, SDK mappings, and custom plugins. [Alternatives](docs/alternatives.md) compares other approaches by use case; no cross-library speed advantage is claimed.
+
+## Understand delivery
+
+- Log methods return queue acceptance, not successful delivery. Each destination defaults to 512 outstanding records and batches of 32; overflow drops the newest record for that destination.
+- Inspect `getStatus()` for dropped/failed records. `flush()` waits for earlier records and supported plugin flush operations, but does not guarantee disk durability or server ingestion.
+- `close()` closes the root and every child. Do not call it when unmounting a feature that shares the app logger.
+- Key redaction covers nested attributes, not secrets embedded in messages or arbitrary strings. OSLog privacy does not apply to Logcat or files.
+- Snapshotting and processors run synchronously on the JS thread. Deferred transport writes do not make the whole call free. See [performance findings and benchmarks](docs/performance.md).
+
+## Documentation
+
+Start with the [documentation index](docs/README.md), then choose:
+
+- [Getting started and troubleshooting](docs/getting-started.md)
+- [API, defaults, errors, and delivery guarantees](docs/api.md)
+- [Transports and file logging](docs/transports.md)
+- [Alternatives and tradeoffs](docs/alternatives.md)
+- [Performance review and reproduction](docs/performance.md)
+- [Architecture](docs/architecture.md), [validation](docs/validation.md), and [release workflow](docs/releases.md)
+
+## Run this repository
+
+Use the pinned Bun version in `package.json` (1.3.14). Native runs need the matching React Native/Expo platform toolchain; iOS requires macOS and Xcode.
+
+```sh
+git clone https://github.com/iauti/react-native-nitro-logger.git
+cd react-native-nitro-logger
+bun install --frozen-lockfile
 bun run check
-bun run example ios       # builds an iOS development app
-bun run example android   # builds an Android development app
-bun run example web       # core + console + memory preview
-bun run example harness --harnessRunner ios # after installing the native app
+bun run example web     # portable playground
+# Or build a native development app:
+bun run example ios
+# bun run example android
 ```
 
-The [Expo Router playground](apps/example) includes child context, redaction, errors, a 1,000-record burst, counters, and a failure-isolation demo. It follows FileToolkit's `packages/` + `apps/example` layout and uses Expo SDK 57, React Native 0.86.3, and Nitro 0.37.1. Native system logging requires a development build; Expo Go cannot load this module. Web supports the core and portable plugins. Do not import `/system` on web.
-
-Install `react-native-nitro-loggerkit` alongside `react-native-nitro-modules`, then rebuild the native app. The declared React Native range starts at 0.83; validation targets 0.86.3, not every release in the range. Use Xcode 16.4+ and the Android toolchain selected by your React Native app; this example was built with Xcode 26.6.
-
-## Choose transports
-
-| Import     | Factory                  | Behavior                                              |
-| ---------- | ------------------------ | ----------------------------------------------------- |
-| `/system`  | `createSystemTransport`  | OSLog on iOS; Logcat on Android, through Nitro        |
-| `/console` | `createConsoleTransport` | Standard JS console methods                           |
-| `/memory`  | `createMemoryTransport`  | Bounded ring buffer with `getRecords()` and `clear()` |
-| `/sentry`  | `createSentryTransport`  | Sentry Logs using your initialized SDK                |
-| `/datadog` | `createDatadogTransport` | Datadog Logs using your initialized SDK               |
-
-Factories return structural `Transport` objects. Plugin entry points isolate dependencies; importing the core does not initialize Nitro or an SDK. OSLog and Logcat share `/system` because each is the platform's system log destination, with the same lifecycle.
-
-```ts
-import * as Sentry from "@sentry/react-native";
-import { DdLogs } from "@datadog/mobile-react-native";
-import { createLogger } from "react-native-nitro-loggerkit";
-import { createSentryTransport } from "react-native-nitro-loggerkit/sentry";
-import { createDatadogTransport } from "react-native-nitro-loggerkit/datadog";
-
-// Initialize both SDKs in your app first. Sentry requires enableLogs: true.
-const logger = createLogger({
-  transports: [
-    { transport: createSentryTransport(Sentry), level: "warn" },
-    { transport: createDatadogTransport(DdLogs), level: "info", capacity: 256 },
-  ],
-});
-```
-
-Sentry receives six native log levels. Nested attribute values become JSON strings because Sentry log attributes are scalar. Datadog maps `trace` to `debug` and `fatal` to `error`, preserving the original level in `nitro.level`. Both include `nitro.sequence` and `nitro.timestamp_ms`. Vendor SDK context may contribute additional attributes outside this logger's redaction boundary. Adapters do not initialize, close, or reconfigure global SDKs and do not capture synthetic exceptions. See [Sentry Logs](https://docs.sentry.io/platforms/react-native/logs/) and [Datadog React Native](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/react_native/advanced_configuration/) for SDK setup.
-
-## Rotating .log files
-
-Install `react-native-nitro-filetoolkit` alongside LoggerKit and rebuild the native app. FileToolkit is an optional peer dependency; only importing `/filetoolkit` loads it.
-
-```ts
-import { createLogger } from "react-native-nitro-loggerkit";
-import { createFileToolkitTransport } from "react-native-nitro-loggerkit/filetoolkit";
-
-const logger = createLogger({
-  transports: [
-    {
-      transport: createFileToolkitTransport({
-        directory: cacheDirectory + "/diagnostic-logs",
-        filename: "uploads.log",
-        maxFileBytes: 1024 * 1024,
-        maxFiles: 3,
-      }),
-      level: "info",
-    },
-  ],
-});
-```
-
-Supply an absolute app-owned directory path or `file://` URI. The transport creates it as needed and appends readable, single-line records: ISO timestamp, severity, optional category, message, and JSON metadata. Control characters and Unicode are escaped, keeping physical lines intact and byte accounting exact. Open the files in a text viewer, or use `tail -F uploads.log` and `grep` on a Mac after copying or exposing the sandbox directory.
-
-Rotation keeps `uploads.log`, `uploads.1.log`, and `uploads.2.log` in this example. `maxFiles` includes the active file; defaults are `current.log`, 1 MiB, and two files. Records are never split. Oversized records and unreadable or oversized existing active files fail the batch and appear in logger status. Other transports continue. Do not point multiple transports or processes at overlapping active/rotation filenames. Cache directories may be evicted by the OS.
-
-Like Winston, file formatting is independent of storage: optionally supply `format: record => JSON.stringify(record)`. The transport adds the newline and escapes actual control characters. Thresholds, queue bounds, and failure isolation use the normal logger transport configuration. `flush()` waits for writes; it does not promise an OS-level fsync or crash durability. Apply app-specific privacy filtering before file delivery; generic key redaction does not remove sensitive text from messages.
-
-For another filesystem backend, import `createFileTransport` and `FileSystemAdapter` from `/file`, supplying the same options plus `fileSystem`. This entry point is portable and does not load Nitro or FileToolkit. Custom transports remain ordinary injectable `Transport` objects.
-
-## Write a plugin
-
-```ts
-import type { Transport } from "react-native-nitro-loggerkit";
-
-const transport: Transport = {
-  name: "custom",
-  async write(records) {
-    await myDestination.send(records);
-  },
-  async flush() {
-    await myDestination.flush();
-  },
-  async close() {
-    await myDestination.close();
-  },
-};
-```
-
-Only `name` and `write` are required. Use a new plugin instance for each root logger, and unique names within a root. Writes, flushes, and close calls are serial within a transport. Records and batches are immutable. A plugin may itself use Nitro; the TypeScript contract does not require a particular native implementation language or base class.
-
-## Delivery contract
-
-`trace < debug < info < warn < error < fatal`. The root defaults to `info`, transports to `trace`. `isLevelEnabled()` checks thresholds and transport availability, letting callers skip expensive attribute construction. Log methods return queue acceptance by at least one transport; they do not acknowledge delivery.
-
-Each transport defaults to 512 outstanding records, batches of 32, and a 5,000 ms operation timeout. Capacity includes records being written. Overflow drops the newest record for that destination. The system transport accepts up to 256 records per batch. These bounds constrain retained records; plugins remain responsible for their own internal resource usage.
-
-Failures are isolated. A rejected batch increments `failed`; it is not retried because partial delivery may already have happened. A timeout disables that transport and drops its queued records, preventing overlap with an underlying call that might still be running. JS timeouts require the JS event loop to progress; they cannot interrupt synchronous plugin code. Timeout does not cancel a remote request. Create a fresh root/plugin when it is safe to recover.
-
-`getStatus()` exposes `pending`, `delivered`, `dropped`, `failed`, and operation `failures` per transport. Counters are cumulative for the logger lifetime. `delivered` means the plugin completed its write. Diagnostics contain the source, operation, and reason, without raw errors or payloads. Route `onDiagnostic` to an independent handler; recursive logging through the same family is suppressed.
-
-`flush()` is an ordered barrier for earlier accepted records, followed by each plugin's optional flush. Logs accepted later may still be pending in the result. Sentry flush failure is reported; Datadog exposes no upload barrier here. OSLog/Logcat completion means the write calls returned, not that the OS persisted every byte.
-
-`close()` is idempotent, stops admission across all children, drains, then releases plugin resources. A disabled plugin is not closed because its timed-out operation may still be using those resources. A child shares root ownership: closing a child closes the entire family. Do not close the app logger when unmounting a feature. On backgrounding, `flush()` is best effort; process termination can still lose logs. This library is not a durable audit log or a crash handler.
-
-## Context, processors, and privacy
-
-Child context overrides parent keys; per-record attributes override child keys. Inputs are snapshotted at creation/log time. Errors retain their own message, stack, cause, and enumerable fields. Getters and `toJSON()` are never invoked. Cycles and unsupported values get markers. Snapshots limit depth to 6, nodes to 256, keys/array items to 64 per container, strings to 4,096 characters, and total attribute text to roughly 16 KiB plus markers. Messages are limited to 4,096 UTF-16 code units. Proxies and custom processors remain trusted caller code.
-
-Processors run synchronously in order and return a new record or `undefined` to drop. They may transform message and attributes; level, sequence, and timestamp stay owned by the logger. Exceptions drop the record and report a diagnostic. Do not perform I/O inside a processor.
-
-Sensitive keys are redacted case-insensitively at every depth: `password`, `passwd`, `secret`, `token`, `access_token`, `refresh_token`, `accessToken`, `refreshToken`, `clientSecret`, `client_secret`, `authorization`, `cookie`, `set-cookie`, `apikey`, and `api_key`. `redactKeys` extends this set. Redaction runs again after processors. It does not detect secrets embedded in message text, error stacks, arbitrary strings, or SDK-added global context.
-
-OSLog defaults to a private payload. Opt into `enablePublicLogging: true` only for intentionally public content; the sample does so for its demo records. Logcat has no equivalent privacy mechanism. Category/tag is required (1–128 UTF-16 code units), subsystem is optional (1–256). OS logging can truncate/filter entries; Android splits long payloads into Unicode-aware chunks. These logs are for diagnostics, not lossless JSON storage.
-
-## Architecture and development
-
-Read the [design decisions](docs/architecture.md), [validation notes](docs/validation.md), and [contributing guide](CONTRIBUTING.md). The design takes transport composition from [Winston](https://github.com/winstonjs/winston) and follows [Margelo's Nitro guidance](https://github.com/margelo/react-native-skills/tree/main/skills/build-nitro-modules). FileToolkit informed the monorepo/example layout; `react-native-nitro-logs` informed category/subsystem behavior. No performance superiority is claimed without device benchmarks.
-
-The TypeScript logger is the public composition API. The two internal HybridObjects are a default-constructible factory and configured native sink. Nitrogen output is committed and shipped; regenerate it with `bun run specs`, never edit generated bindings. See [the source](packages/react-native-nitro-logger/src).
-
-Release workflow: [publishing and rehearsals](docs/releases.md).
+The example demonstrates context, redaction, errors, bursts, counters, and transport failure isolation. See [contributing](CONTRIBUTING.md) for code generation, packaging, and native runtime checks. MIT licensed; see [LICENSE](LICENSE).
