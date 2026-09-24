@@ -6,14 +6,14 @@ Import `createLogger`, `levels`, and public types from `react-native-nitro-logge
 
 ## createLogger(options: LoggerOptions): Logger
 
-| Option                                      | Default  | Meaning                                                     |
-| ------------------------------------------- | -------- | ----------------------------------------------------------- | --------------------- |
-| `transports: readonly TransportOptions[]`   | Required | Destinations; an empty array accepts no logs                |
-| `level: LogLevel`                           | `"info"` | Minimum root severity; cannot be changed after construction |
-| `context: Attributes`                       | `{}`     | Snapshot shared by records and children                     |
-| `processors`                                | `[]`     | Ordered synchronous `(record: LogRecord) => LogRecord       | undefined` transforms |
-| `redactKeys: readonly string[]`             | `[]`     | Extend built-in sensitive key names                         |
-| `onDiagnostic: (event: Diagnostic) => void` | None     | Independent failure observer; exceptions are contained      |
+| Option                                      | Default  | Meaning                                                                        |
+| ------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `transports: readonly TransportOptions[]`   | Required | Destinations; an empty array accepts no logs                                   |
+| `level: LogLevel`                           | `"info"` | Minimum root severity; cannot be changed after construction                    |
+| `context: Attributes`                       | `{}`     | Snapshot shared by records and children                                        |
+| `processors`                                | `[]`     | Ordered synchronous `(record: LogRecord) => LogRecord \| undefined` transforms |
+| `redactKeys: readonly string[]`             | `[]`     | Extend built-in sensitive key names                                            |
+| `onDiagnostic: (event: Diagnostic) => void` | None     | Independent failure observer; exceptions are contained                         |
 
 `TransportOptions` wraps the factory result:
 
