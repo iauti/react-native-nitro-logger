@@ -12,7 +12,7 @@ Three designs were considered: a native-only engine (excellent for native produc
 
 Level gate → context snapshot → synchronous processors → bounded normalization and key redaction → immutable record → independent bounded transport queues → asynchronous batches.
 
-Every transport owns its queue. Capacity includes in-flight records. Overflow drops the newest record for that transport and increments its counter. One slow transport cannot delay another. A write exception fails that batch; no automatic retry risks duplicate telemetry. A timed-out operation disables the transport, because its underlying operation may still be running and cannot safely overlap subsequent calls.
+Every transport owns its queue. Capacity includes in-flight records. Overflow drops the newest record for that transport and increments its counter. An asynchronously waiting transport does not hold up another worker. Synchronous plugin work still shares the JS thread and can delay all workers. A write exception fails that batch; no automatic retry risks duplicate telemetry. A timed-out operation disables the transport, because its underlying operation may still be running and cannot safely overlap subsequent calls.
 
 Flush inserts an ordered barrier after previously accepted records, waits for writes, and calls the optional SDK flush method. It is not a remote delivery acknowledgement. Close rejects further records across the entire child family, drains, and invokes transport cleanup once. Child loggers share lifecycle and transport ownership. Create distinct transport instances for distinct roots; injected vendor SDKs remain owned by the app.
 
@@ -35,3 +35,7 @@ Behavior tests cover ordering, thresholds, context snapshots, redaction, failure
 ## Native wire enum
 
 The internal system enum uses `log-debug` and other prefixed values. Nitrogen uppercases literal union cases, and an unprefixed `debug` produces a C++ `DEBUG` macro collision in Xcode debug builds. The public level union remains unchanged; the explicitly internal transport boundary handles this mapping. No generated-code patch or global preprocessor override is needed.
+
+## Performance review
+
+See [measured portable costs and queue alternatives](performance.md). Native batching does not move core snapshots, processors, or JSON serialization off the JS thread.

@@ -9,16 +9,20 @@
   "scripts": {
     "specs": "bun run --cwd packages/react-native-nitro-logger specs",
     "build": "tsc -p packages/react-native-nitro-logger/tsconfig.json",
-    "typecheck": "tsc -p packages/react-native-nitro-logger/tsconfig.json --noEmit && tsc -p apps/example/tsconfig.json --noEmit && tsc -p tests/tsconfig.json",
+    "typecheck": "tsc -p packages/react-native-nitro-logger/tsconfig.json --noEmit && tsc -p apps/example/tsconfig.json --noEmit && tsc -p tests/tsconfig.json && tsc -p benchmarks/tsconfig.json",
     "test": "bun test tests",
-    "format": "prettier --write packages/react-native-nitro-logger/src tests apps/example/src docs README.md",
-    "format:check": "prettier --check packages/react-native-nitro-logger/src tests apps/example/src docs README.md",
-    "check": "bun run specs && bun run build && bun run typecheck && bun test && bun run format:check",
+    "format": "prettier --write packages/react-native-nitro-logger/src tests apps/example/src docs README.md benchmarks scripts/check-docs.mjs",
+    "format:check": "prettier --check packages/react-native-nitro-logger/src tests apps/example/src docs README.md benchmarks scripts/check-docs.mjs",
+    "check": "bun run specs && bun run build && bun run typecheck && bun test && bun run format:check && bun run docs:check",
     "example": "bun run --cwd apps/example",
     "package:check": "bun run build && node scripts/check-package.mjs",
     "check:generated": "node scripts/check-generated.mjs",
     "release": "./scripts/release.sh",
-    "release:test": "node scripts/test-release-flow.mjs"
+    "release:test": "node scripts/test-release-flow.mjs",
+    "benchmark": "bun benchmarks/logger.ts",
+    "benchmark:queue": "bun benchmarks/queue.ts",
+    "docs:check": "node scripts/check-docs.mjs",
+    "docs:sync": "node scripts/check-docs.mjs --sync"
   },
   "devDependencies": {
     "@release-it/bumper": "8.0.1",
